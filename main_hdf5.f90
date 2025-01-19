@@ -19,12 +19,11 @@ program main
   type(cosmo)  :: headc
 
 
-  integer :: NumPart, TotNumPart ,my_len
-  real(8) :: Box, Omega, OmegaBaryon, Hubble
+  integer :: NumPart, TotNumPart 
+  real(8) :: Box, Omega, OmegaBaryon, dx
   character(len=20) :: FileBase, hdf5_name
 
-  integer :: ierr, i, ii, jj, kk, extra, start_index, end_index
-  integer :: n_dim, nz_end, nz_start
+  integer :: ierr, i, ii, jj, kk, extra, nn
 
   character(len=30) :: ic_name(12), message(4)
   real(sp), allocatable :: ic_array_x(:) ,ic_array_y(:),ic_array_z(:)
@@ -34,23 +33,21 @@ program main
   integer :: Npart(2)
   integer(8) :: Nall(2)
   real(8) :: Massarr(2)
-  real(8) :: Time, Redshift, BoxSize
+  real(8) :: Time, Redshift
   integer :: NumFiles
 
 
   real,dimension(:,:),allocatable :: POS
+  real,dimension(:,:),allocatable :: ini_POS
+  real :: shfit_gas, shfit_CDM , grid_size
   integer,allocatable :: ID0(:), ID1(:)
   real,allocatable :: U(:)
 
-
-  integer :: blockmaxlen, maxidlen, maxlongidlen
-  real(8), allocatable :: block(:), blockid(:)
-  integer :: dummy
   character(len=100) :: buf
-  integer :: fd=10
-  integer :: type_class
-  integer :: ndim, dims11(3), max_dims(3)
-  integer(4) :: hdf5_uint32 , hdf5_uint64
+ 
+  real(8) :: G = 43.0187
+  real(8) :: Hubble =100.
+
 
 
   call H5open_f(error)
@@ -93,10 +90,13 @@ program main
   print '(A, F8.5)', "omegav =", headc%omegav
   print '(A, F8.5)', "h0 =", headc%h0
 
+  
+
 
   nx= headt%nx
   ny= headt%ny
   nz= headt%nz
+  dx=headt%dx
 
   Omega=headc%omegam
   InitTime=headc%astart
@@ -104,12 +104,15 @@ program main
   HubbleParam=headc%h0
 
   OmegaBaryon=0.044
-  Hubble=70.
-  Box=nx
   TotNumPart=nz*ny*nx
+  
+  grid_size=dx*(HubbleParam/100)
+
+  Box=grid_size*nx
+  print *, "Boxsize =", Box
+  print *, "grid_size =", grid_size
   FileBase='ics'
   hdf5_name='hdf5'
-  my_len=nz*ny*nx
 
 
   if (MOD(TotNumPart, file_number) /= 0) then 
@@ -128,28 +131,37 @@ program main
 
   Npart(1) = NumPart
   Nall(1) = TotNumPart
-  Massarr(1) = (OmegaBaryon) * 3 * Hubble * Hubble / (8 * pi * 6.67430e-11) * Box**3 / TotNumPart
-  Massarr(2) = (Omega - OmegaBaryon) * 3 * Hubble * Hubble / (8 * pi * 6.67430e-11) * Box**3 / TotNumPart
+  Massarr(1) = (OmegaBaryon)  * 3*Hubble*Hubble/(8*PI*G)* Box**3 / TotNumPart
+  Massarr(2) = (Omega - OmegaBaryon) * 3*Hubble*Hubble/(8*PI*G)  * Box**3 / TotNumPart
+
 
   Time = InitTime
   Redshift = 1.0 / InitTime - 1.0
   NumFiles = file_number
-  BoxSize = Box
 
   dims2(1)=3
   dims2(2)=NumPart
 
-  start_index=1
-  end_index=NumPart
-  
-  nz_end=nz/file_number
-  nz_start=1
-  n_dim=nz/file_number
+
 
   allocate(ic_array_x(nz*ny*2*(nx/2+1)),ic_array_y(nz*ny*2*(nx/2+1)),ic_array_z(nz*ny*2*(nx/2+1)))
   allocate(POS(3,NumPart))
   allocate(ID0(NumPart), ID1(NumPart))
   allocate(U(NumPart))
+  allocate(ini_POS(3,TotNumPart))
+
+  nn=1
+
+  do ii=1, nx
+    do jj=1, ny
+      do kk=1, nz
+        ini_POS(1,nn) = grid_size*(ii-0.5)
+        ini_POS(2,nn) = grid_size*(jj-0.5)
+        ini_POS(3,nn) = grid_size*(kk-0.5)
+        nn = nn+1
+      enddo 
+    enddo
+  enddo
 
 
   do ii=1, file_number
@@ -176,8 +188,8 @@ program main
     call h5sclose_f(space_id, error)
 
     call h5screate_simple_f(1, dims, space_id, error)
-    call h5acreate_f(group_id, "NumPart_Total", H5T_NATIVE_INTEGER, space_id, dset_id, error)
-    call h5awrite_f(dset_id, H5T_NATIVE_INTEGER, Nall, dims, error)
+    call h5acreate_f(group_id, "NumPart_Total", H5T_STD_U64LE, space_id, dset_id, error)
+    call h5awrite_f(dset_id, H5T_STD_U64LE, Nall, dims, error)
     call h5aclose_f(dset_id, error)
     call h5sclose_f(space_id, error)
 
@@ -202,7 +214,7 @@ program main
 
     call h5screate_simple_f(1, dims, space_id, error)
     call h5acreate_f(group_id, "BoxSize", H5T_NATIVE_DOUBLE, space_id, dset_id, error)
-    call h5awrite_f(dset_id, H5T_NATIVE_DOUBLE, BoxSize, dims, error)
+    call h5awrite_f(dset_id, H5T_NATIVE_DOUBLE, Box, dims, error)
     call h5aclose_f(dset_id, error)
     call h5sclose_f(space_id, error)
 
@@ -219,8 +231,8 @@ program main
       stop
     end if
 
-    call h5gcreate_f(file_id, "ParticleType0", ParticleType0 ,error)
-    call h5gcreate_f(file_id, "ParticleType1", ParticleType1, error)
+    call h5gcreate_f(file_id, "PartType0", ParticleType0 ,error)
+    call h5gcreate_f(file_id, "PartType1", ParticleType1, error)
     call h5screate_simple_f(2, dims2, space_id, error)
 
     call h5dcreate_f(ParticleType0, "Coordinates", H5T_NATIVE_REAL, space_id, Coordinates0, error)
@@ -233,12 +245,11 @@ program main
     call grafic_read(ic_array_x, nz, 0, ny, nx, trim(ic_name(1))) 
     call grafic_read(ic_array_y, nz, 0, ny, nx, trim(ic_name(2))) 
     call grafic_read(ic_array_z, nz, 0, ny, nx, trim(ic_name(3))) 
-  
 
     do kk = 1, NumPart
-      POS(1,kk) = ic_array_x(kk)
-      POS(2,kk) = ic_array_y(kk)
-      POS(3,kk) = ic_array_z(kk)
+      POS(1,kk) = ini_POS(1,kk+ NumPart*(ii-1))+grid_size*(ic_array_x(kk+ NumPart*(ii-1)))+shfit_gas
+      POS(2,kk) = ini_POS(2,kk+ NumPart*(ii-1))+grid_size*(ic_array_y(kk+ NumPart*(ii-1)))+shfit_gas
+      POS(3,kk) = ini_POS(3,kk+ NumPart*(ii-1))+grid_size*(ic_array_z(kk+ NumPart*(ii-1)))+shfit_gas
     end do
 
     call h5dwrite_f(Coordinates0, H5T_NATIVE_REAL, POS, dims2, error)
@@ -257,10 +268,11 @@ program main
     call grafic_read(ic_array_z, nz, 0, ny, nx, trim(ic_name(6))) 
 
     do kk = 1, NumPart
-      POS(1,kk) = ic_array_x(kk)
-      POS(2,kk) = ic_array_y(kk)
-      POS(3,kk) = ic_array_z(kk)
+      POS(1,kk) = ini_POS(1,kk+ NumPart*(ii-1))+grid_size*(ic_array_x(kk+ NumPart*(ii-1)))+shfit_CDM
+      POS(2,kk) = ini_POS(2,kk+ NumPart*(ii-1))+grid_size*(ic_array_y(kk+ NumPart*(ii-1)))+shfit_CDM
+      POS(3,kk) = ini_POS(3,kk+ NumPart*(ii-1))+grid_size*(ic_array_z(kk+ NumPart*(ii-1)))+shfit_CDM
     end do
+
     call h5screate_simple_f(2, dims2, space_id, error)
     call h5dwrite_f(Coordinates1, H5T_NATIVE_REAL, POS, dims2, error)
     call h5dclose_f(Coordinates1, error)
@@ -277,11 +289,11 @@ program main
     call grafic_read(ic_array_x, nz, 0, ny, nx, trim(ic_name(7))) 
     call grafic_read(ic_array_y, nz, 0, ny, nx, trim(ic_name(8))) 
     call grafic_read(ic_array_z, nz, 0, ny, nx, trim(ic_name(9))) 
-    
+
     do kk = 1, NumPart
-      POS(1,kk) = ic_array_x(kk)
-      POS(2,kk) = ic_array_y(kk)
-      POS(3,kk) = ic_array_z(kk)
+      POS(1,kk) = ic_array_x(kk+ NumPart*(ii-1))
+      POS(2,kk) = ic_array_y(kk+ NumPart*(ii-1))
+      POS(3,kk) = ic_array_z(kk+ NumPart*(ii-1))
     end do
     
     call h5screate_simple_f(2, dims2, space_id, error)
@@ -302,9 +314,9 @@ program main
     call grafic_read(ic_array_z, nz, 0, ny, nx, trim(ic_name(12))) 
    
     do kk = 1, NumPart
-      POS(1,kk) = ic_array_x(kk)
-      POS(2,kk) = ic_array_y(kk)
-      POS(3,kk) = ic_array_z(kk)
+      POS(1,kk) = ic_array_x(kk+ NumPart*(ii-1))
+      POS(2,kk) = ic_array_y(kk+ NumPart*(ii-1))
+      POS(3,kk) = ic_array_z(kk+ NumPart*(ii-1))
     end do
 
     call h5screate_simple_f(2, dims2, space_id, error)
@@ -320,15 +332,16 @@ program main
     print *, 'ic_vel_CDM_Transform done'
   
 
-    do i = 1, NumPart
-      ID0(i) = i + start_index
-      ID1(i) = i + start_index+ TotNumPart
+    do jj = 1, NumPart
+      ID0(jj) = jj + NumPart*(ii-1)
+      ID1(jj) = jj + NumPart*(ii-1)+ TotNumPart
     end do
+
 
     dims(1)=NumPart
     call h5screate_simple_f(1, dims, space_id, error)
-    call h5dcreate_f(ParticleType0, "ParticleIDs", H5T_NATIVE_REAL, space_id, dset_id, error)
-    call h5dwrite_f(dset_id, H5T_NATIVE_REAL, ID0, dims, error)
+    call h5dcreate_f(ParticleType0, "ParticleIDs", H5T_NATIVE_INTEGER, space_id, dset_id, error)
+    call h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, ID0, dims, error)
     call h5dclose_f(dset_id, error)
     call h5sclose_f(space_id, error)
 
@@ -337,8 +350,8 @@ program main
       stop
     end if
     call h5screate_simple_f(1, dims, space_id, error)
-    call h5dcreate_f(ParticleType1, "ParticleIDs", H5T_NATIVE_REAL, space_id, dset_id, error)
-    call h5dwrite_f(dset_id, H5T_NATIVE_REAL, ID1, dims, error)
+    call h5dcreate_f(ParticleType1, "ParticleIDs", H5T_NATIVE_INTEGER, space_id, dset_id, error)
+    call h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, ID1, dims, error)
     call h5dclose_f(dset_id, error)
     call h5sclose_f(space_id, error)
     call h5gclose_f(ParticleType1, error)
@@ -368,14 +381,14 @@ program main
     call h5fclose_f(file_id, error)
 
     print *, ii, "file all done"
-    start_index=start_index+NumPart
-    end_index=end_index+NumPart
+
 
   end do 
 
   deallocate(POS, ic_array_x, ic_array_y, ic_array_z)
   deallocate(ID0, ID1)
   deallocate(U)
+  deallocate(ini_POS)
 
   print *, "all done"
   
