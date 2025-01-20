@@ -16,7 +16,7 @@ EXE = test
 
 # Source and object files
 #SRC = main.f90
-SRC = main_hddf5.f90
+SRC = main_hdf5.f90
 OBJ = ../grafic_io.o ../grafic_types.o ../parallel_io.o 
 
 # Default rule to build the executable
