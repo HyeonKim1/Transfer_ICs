@@ -11,7 +11,7 @@ program main
   
   ! 사용자 정의 변수와 상수
   logical :: file_exists
-  integer :: nx, ny, nz
+  integer :: nx, ny, nz , index, index2, n2x
   real(8) :: InitTime, OmegaLambda, HubbleParam
   integer :: file_number=16
 
@@ -23,10 +23,12 @@ program main
   real(8) :: Box, Omega, OmegaBaryon, dx
   character(len=20) :: FileBase, hdf5_name
 
-  integer :: ierr, i, ii, jj, kk, extra, nn
+  integer :: ierr, ii, jj, kk, extra, nn, i, j,k
 
-  character(len=30) :: ic_name(12), message(4)
+  character(len=11) :: ic_name(12)
+  character(len=30) :: message(4)
   real(sp), allocatable :: ic_array_x(:) ,ic_array_y(:),ic_array_z(:)
+  real(sp), allocatable :: re_ic_array_x(:) ,re_ic_array_y(:),re_ic_array_z(:)
 
 
   integer, parameter :: BUFFER = 10
@@ -72,6 +74,7 @@ program main
 
 
     ! 헤더 읽기 시도
+  print *, trim(ic_name(1))
   call grafic_read_header(trim(ic_name(1)), headt, headc)
 
 
@@ -145,16 +148,19 @@ program main
 
 
   allocate(ic_array_x(nz*ny*2*(nx/2+1)),ic_array_y(nz*ny*2*(nx/2+1)),ic_array_z(nz*ny*2*(nx/2+1)))
+  allocate(re_ic_array_x(nz*ny*nz),re_ic_array_y(nz*ny*nz),re_ic_array_z(nz*ny*nz))
   allocate(POS(3,NumPart))
   allocate(ID0(NumPart), ID1(NumPart))
   allocate(U(NumPart))
   allocate(ini_POS(3,TotNumPart))
 
+  n2x = 2*(nx/2+1)
+
   nn=1
 
-  do ii=1, nx
+  do kk=1, nx
     do jj=1, ny
-      do kk=1, nz
+      do ii=1, nz
         ini_POS(1,nn) = grid_size*(ii-0.5)
         ini_POS(2,nn) = grid_size*(jj-0.5)
         ini_POS(3,nn) = grid_size*(kk-0.5)
@@ -162,6 +168,7 @@ program main
       enddo 
     enddo
   enddo
+
 
 
   do ii=1, file_number
@@ -244,12 +251,26 @@ program main
     
     call grafic_read(ic_array_x, nz, 0, ny, nx, trim(ic_name(1))) 
     call grafic_read(ic_array_y, nz, 0, ny, nx, trim(ic_name(2))) 
-    call grafic_read(ic_array_z, nz, 0, ny, nx, trim(ic_name(3))) 
+    call grafic_read(ic_array_z, nz, 0, ny, nx, trim(ic_name(3)))
+
+    index2 = 1
+    
+    do k=1, nz
+      do j=1, ny
+        do i=1, nz
+          index=((k-1)*ny+j-1)*n2x+i
+          re_ic_array_x(index2)=ic_array_x(index)
+          re_ic_array_y(index2)=ic_array_y(index)
+          re_ic_array_z(index2)=ic_array_z(index)
+          index2 = index2 + 1
+        enddo
+      enddo
+    enddo
 
     do kk = 1, NumPart
-      POS(1,kk) = ini_POS(1,kk+ NumPart*(ii-1))+grid_size*(ic_array_x(kk+ NumPart*(ii-1)))+shfit_gas
-      POS(2,kk) = ini_POS(2,kk+ NumPart*(ii-1))+grid_size*(ic_array_y(kk+ NumPart*(ii-1)))+shfit_gas
-      POS(3,kk) = ini_POS(3,kk+ NumPart*(ii-1))+grid_size*(ic_array_z(kk+ NumPart*(ii-1)))+shfit_gas
+      POS(1,kk) = ini_POS(1,kk+ NumPart*(ii-1))+(re_ic_array_x(kk+ NumPart*(ii-1)))+shfit_gas
+      POS(2,kk) = ini_POS(2,kk+ NumPart*(ii-1))+(re_ic_array_y(kk+ NumPart*(ii-1)))+shfit_gas
+      POS(3,kk) = ini_POS(3,kk+ NumPart*(ii-1))+(re_ic_array_z(kk+ NumPart*(ii-1)))+shfit_gas
     end do
 
     call h5dwrite_f(Coordinates0, H5T_NATIVE_REAL, POS, dims2, error)
@@ -264,13 +285,27 @@ program main
     print *, 'ic_pos_bayron_Transform done'
 
     call grafic_read(ic_array_x, nz, 0, ny, nx, trim(ic_name(4))) 
-    call grafic_read(ic_array_y, nz, 0, ny, nx, trim(ic_name(5))) 
+    call grafic_read(ic_array_y, nz, 0, ny, nx, trim(ic_name(5)))
     call grafic_read(ic_array_z, nz, 0, ny, nx, trim(ic_name(6))) 
 
+    index2 = 1
+
+    do k=1, nz
+      do j=1, ny
+        do i=1, nz
+          index=((k-1)*ny+j-1)*n2x+i
+          re_ic_array_x(index2)=ic_array_x(index)
+          re_ic_array_y(index2)=ic_array_y(index)
+          re_ic_array_z(index2)=ic_array_z(index)
+          index2 = index2 + 1
+        enddo
+      enddo
+    enddo
+
     do kk = 1, NumPart
-      POS(1,kk) = ini_POS(1,kk+ NumPart*(ii-1))+grid_size*(ic_array_x(kk+ NumPart*(ii-1)))+shfit_CDM
-      POS(2,kk) = ini_POS(2,kk+ NumPart*(ii-1))+grid_size*(ic_array_y(kk+ NumPart*(ii-1)))+shfit_CDM
-      POS(3,kk) = ini_POS(3,kk+ NumPart*(ii-1))+grid_size*(ic_array_z(kk+ NumPart*(ii-1)))+shfit_CDM
+      POS(1,kk) = ini_POS(1,kk+ NumPart*(ii-1))+(re_ic_array_x(kk+ NumPart*(ii-1)))+shfit_CDM
+      POS(2,kk) = ini_POS(2,kk+ NumPart*(ii-1))+(re_ic_array_y(kk+ NumPart*(ii-1)))+shfit_CDM
+      POS(3,kk) = ini_POS(3,kk+ NumPart*(ii-1))+(re_ic_array_z(kk+ NumPart*(ii-1)))+shfit_CDM
     end do
 
     call h5screate_simple_f(2, dims2, space_id, error)
@@ -290,10 +325,24 @@ program main
     call grafic_read(ic_array_y, nz, 0, ny, nx, trim(ic_name(8))) 
     call grafic_read(ic_array_z, nz, 0, ny, nx, trim(ic_name(9))) 
 
+    index2 = 1
+
+    do k=1, nz
+      do j=1, ny
+        do i=1, nz
+          index=((k-1)*ny+j-1)*n2x+i
+          re_ic_array_x(index2)=ic_array_x(index)
+          re_ic_array_y(index2)=ic_array_y(index)
+          re_ic_array_z(index2)=ic_array_z(index)
+          index2 = index2 + 1
+        enddo
+      enddo
+    enddo
+
     do kk = 1, NumPart
-      POS(1,kk) = ic_array_x(kk+ NumPart*(ii-1))
-      POS(2,kk) = ic_array_y(kk+ NumPart*(ii-1))
-      POS(3,kk) = ic_array_z(kk+ NumPart*(ii-1))
+      POS(1,kk) = re_ic_array_x(kk+ NumPart*(ii-1))*sqrt(InitTime)
+      POS(2,kk) = re_ic_array_y(kk+ NumPart*(ii-1))*sqrt(InitTime)
+      POS(3,kk) = re_ic_array_z(kk+ NumPart*(ii-1))*sqrt(InitTime)
     end do
     
     call h5screate_simple_f(2, dims2, space_id, error)
@@ -312,11 +361,25 @@ program main
     call grafic_read(ic_array_x, nz, 0, ny, nx, trim(ic_name(10))) 
     call grafic_read(ic_array_y, nz, 0, ny, nx, trim(ic_name(11))) 
     call grafic_read(ic_array_z, nz, 0, ny, nx, trim(ic_name(12))) 
+
+    index2 = 1
+
+    do k=1, nz
+      do j=1, ny
+        do i=1, nz
+          index=((k-1)*ny+j-1)*n2x+i
+          re_ic_array_x(index2)=ic_array_x(index)
+          re_ic_array_y(index2)=ic_array_y(index)
+          re_ic_array_z(index2)=ic_array_z(index)
+          index2 = index2 + 1
+        enddo
+      enddo
+    enddo
    
     do kk = 1, NumPart
-      POS(1,kk) = ic_array_x(kk+ NumPart*(ii-1))
-      POS(2,kk) = ic_array_y(kk+ NumPart*(ii-1))
-      POS(3,kk) = ic_array_z(kk+ NumPart*(ii-1))
+      POS(1,kk) = re_ic_array_x(kk+ NumPart*(ii-1))*sqrt(InitTime)
+      POS(2,kk) = re_ic_array_y(kk+ NumPart*(ii-1))*sqrt(InitTime)
+      POS(3,kk) = re_ic_array_z(kk+ NumPart*(ii-1))*sqrt(InitTime)
     end do
 
     call h5screate_simple_f(2, dims2, space_id, error)
