@@ -340,9 +340,9 @@ program main
     enddo
 
     do kk = 1, NumPart
-      POS(1,kk) = re_ic_array_x(kk+ NumPart*(ii-1))*sqrt(InitTime)
-      POS(2,kk) = re_ic_array_y(kk+ NumPart*(ii-1))*sqrt(InitTime)
-      POS(3,kk) = re_ic_array_z(kk+ NumPart*(ii-1))*sqrt(InitTime)
+      POS(1,kk) = re_ic_array_x(kk+ NumPart*(ii-1))/sqrt(InitTime)
+      POS(2,kk) = re_ic_array_y(kk+ NumPart*(ii-1))/sqrt(InitTime)
+      POS(3,kk) = re_ic_array_z(kk+ NumPart*(ii-1))/sqrt(InitTime)
     end do
     
     call h5screate_simple_f(2, dims2, space_id, error)
@@ -377,9 +377,9 @@ program main
     enddo
    
     do kk = 1, NumPart
-      POS(1,kk) = re_ic_array_x(kk+ NumPart*(ii-1))*sqrt(InitTime)
-      POS(2,kk) = re_ic_array_y(kk+ NumPart*(ii-1))*sqrt(InitTime)
-      POS(3,kk) = re_ic_array_z(kk+ NumPart*(ii-1))*sqrt(InitTime)
+      POS(1,kk) = re_ic_array_x(kk+ NumPart*(ii-1))/sqrt(InitTime)
+      POS(2,kk) = re_ic_array_y(kk+ NumPart*(ii-1))/sqrt(InitTime)
+      POS(3,kk) = re_ic_array_z(kk+ NumPart*(ii-1))/sqrt(InitTime)
     end do
 
     call h5screate_simple_f(2, dims2, space_id, error)
