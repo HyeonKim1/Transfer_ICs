@@ -41,6 +41,7 @@ program main
   real,dimension(:,:),allocatable :: POS
   real,dimension(:,:),allocatable :: ini_POS
   real :: shfit_gas, shfit_CDM , grid_size
+  real :: pos_x, pos_y, pos_z
   integer,allocatable :: ID0(:), ID1(:)
   real,allocatable :: U(:)
 
@@ -52,7 +53,7 @@ program main
 
   call H5open_f(error)
 
-    ! 헤더 읽기 시도
+  ! 헤더 읽기 시도
   call grafic_read_header(trim('../ic_posbx'), headt, headc)
 
 
@@ -243,9 +244,15 @@ program main
     do j=1, ny
       do i=1, nx
         index=((k-1)*ny+j-1)*n2x+i
-        POS(1,index2)=ini_POS(1,index2)+ic_array_x(index)+shfit_gas
-        POS(2,index2)=ini_POS(2,index2)+ic_array_y(index)+shfit_gas
-        POS(3,index2)=ini_POS(3,index2)+ic_array_z(index)+shfit_gas
+
+        pos_x=ini_POS(1,index2)+ic_array_x(index)+shfit_gas
+        pos_y=ini_POS(2,index2)+ic_array_y(index)+shfit_gas
+        pos_z=ini_POS(3,index2)+ic_array_z(index)+shfit_gas
+
+        POS(1,index2)=MODULO(pos_x,Box)
+        POS(2,index2)=MODULO(pos_y,Box)
+        POS(3,index2)=MODULO(pos_z,Box)
+
         index2 = index2 + 1
       enddo
     enddo
@@ -278,9 +285,15 @@ program main
     do j=1, ny
       do i=1, nx
         index=((k-1)*ny+j-1)*n2x+i
-        POS(1,index2)=ini_POS(1,index2)+ic_array_x(index)+shfit_CDM
-        POS(2,index2)=ini_POS(2,index2)+ic_array_y(index)+shfit_CDM
-        POS(3,index2)=ini_POS(3,index2)+ic_array_z(index)+shfit_CDM
+
+        pos_x=ini_POS(1,index2)+ic_array_x(index)+shfit_CDM
+        pos_y=ini_POS(2,index2)+ic_array_y(index)+shfit_CDM
+        pos_z=ini_POS(3,index2)+ic_array_z(index)+shfit_CDM
+
+        POS(1,index2)=MODULO(pos_x,Box)
+        POS(2,index2)=MODULO(pos_y,Box)
+        POS(3,index2)=MODULO(pos_z,Box)
+
         index2 = index2 + 1
       enddo
     enddo
