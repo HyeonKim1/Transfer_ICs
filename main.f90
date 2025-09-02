@@ -113,9 +113,9 @@ program main
   HubbleParam=headc%h0
 
   OmegaBaryon=0.044
-  Hubble=70.
-  Box=nx
-  TotNumPart=nx*nx*nx
+  Hubble=68.
+  Box=1024
+  TotNumPart=nx*ny*nz
   FileBase='ics'
 
   write(buf, '(A,".",I0)') trim(FileBase), ThisTask
