@@ -4,7 +4,12 @@ program main
   use grafic_io
   implicit none
   ! HDF5 관련 변수
-  integer(HID_T) :: file_id, group_id, dset_id, space_id, ParticleType0 ,ParticleType1, Coordinates0, Coordinates1, Velocities0, Velocities1
+  integer(HID_T) :: file_id, group_id, dset_id, space_id
+  integer(HID_T) :: ParticleType0 ,ParticleType1, ParticleType2, ParticleType3, ParticleType4, ParticleType5
+  integer(HID_T) :: Coordinates0 ,Coordinates1, Coordinates2, Coordinates3, Coordinates4, Coordinates5
+  integer(HID_T) :: Velocities0 ,Velocities1, Velocities2, Velocities3, Velocities4, Velocities5
+
+
   integer :: error  ! HDF5 error codes
   integer(HSIZE_T), dimension(1) :: dims
   integer(HSIZE_T), dimension(2) :: dims2
@@ -31,9 +36,9 @@ program main
 
 
   integer, parameter :: BUFFER = 10
-  integer :: Npart(2)
-  integer(8) :: Nall(2)
-  real(8) :: Massarr(2)
+  integer :: Npart(6)
+  integer(8) :: Nall(6)
+  real(8) :: Massarr(6)
   real(8) :: Time, Redshift
   integer :: NumFiles
 
@@ -137,9 +142,9 @@ program main
   do kk=1, nz
     do jj=1, ny
       do ii=1, nx
-        ini_POS(1,nn) = grid_size*(ii)
-        ini_POS(2,nn) = grid_size*(jj)
-        ini_POS(3,nn) = grid_size*(kk)
+        ini_POS(1,nn) = grid_size*(ii-0.5)
+        ini_POS(2,nn) = grid_size*(jj-0.5)
+        ini_POS(3,nn) = grid_size*(kk-0.5)
         nn = nn+1
       enddo 
     enddo
@@ -162,7 +167,7 @@ program main
       call system('rm ' // trim(buf))  ! Delete the existing file
   end if
 
-  dims(1)=2
+  dims(1)=6
 
   call h5fcreate_f(buf, H5F_ACC_TRUNC_F, file_id, error)
   call h5gcreate_f(file_id, "Header",group_id, error)
@@ -219,12 +224,25 @@ program main
 
   call h5gcreate_f(file_id, "PartType0", ParticleType0 ,error)
   call h5gcreate_f(file_id, "PartType1", ParticleType1, error)
+  call h5gcreate_f(file_id, "PartType2", ParticleType2 ,error)
+  call h5gcreate_f(file_id, "PartType3", ParticleType3, error)
+  call h5gcreate_f(file_id, "PartType4", ParticleType4 ,error)
+  call h5gcreate_f(file_id, "PartType5", ParticleType5, error)
   call h5screate_simple_f(2, dims2, space_id, error)
 
   call h5dcreate_f(ParticleType0, "Coordinates", H5T_NATIVE_REAL, space_id, Coordinates0, error)
   call h5dcreate_f(ParticleType1, "Coordinates", H5T_NATIVE_REAL, space_id, Coordinates1, error)
+  call h5dcreate_f(ParticleType2, "Coordinates", H5T_NATIVE_REAL, space_id, Coordinates2, error)
+  call h5dcreate_f(ParticleType3, "Coordinates", H5T_NATIVE_REAL, space_id, Coordinates3, error)
+  call h5dcreate_f(ParticleType4, "Coordinates", H5T_NATIVE_REAL, space_id, Coordinates4, error)
+  call h5dcreate_f(ParticleType5, "Coordinates", H5T_NATIVE_REAL, space_id, Coordinates5, error)
+
   call h5dcreate_f(ParticleType0, "Velocities", H5T_NATIVE_REAL, space_id, Velocities0, error)
   call h5dcreate_f(ParticleType1, "Velocities", H5T_NATIVE_REAL, space_id, Velocities1, error)
+  call h5dcreate_f(ParticleType2, "Velocities", H5T_NATIVE_REAL, space_id, Velocities2, error)
+  call h5dcreate_f(ParticleType3, "Velocities", H5T_NATIVE_REAL, space_id, Velocities3, error)
+  call h5dcreate_f(ParticleType4, "Velocities", H5T_NATIVE_REAL, space_id, Velocities4, error)
+  call h5dcreate_f(ParticleType5, "Velocities", H5T_NATIVE_REAL, space_id, Velocities5, error)
 
   print *, "Header writing done"
 

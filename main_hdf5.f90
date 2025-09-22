@@ -91,7 +91,7 @@ program main
   Box=grid_size*nx
   print *, "Boxsize =", Box
   print *, "grid_size =", grid_size
-  FileBase='ics'
+  FileBase='ics_000'
   hdf5_name='hdf5'
 
 
@@ -137,16 +137,16 @@ program main
   do kk=1, nz
     do jj=1, ny
       do ii=1, nx
-        ini_POS(1,nn) = grid_size*(ii)
-        ini_POS(2,nn) = grid_size*(jj)
-        ini_POS(3,nn) = grid_size*(kk)
+        ini_POS(1,nn) = grid_size*(ii-0.5)
+        ini_POS(2,nn) = grid_size*(jj-0.5)
+        ini_POS(3,nn) = grid_size*(kk-0.5)
         nn = nn+1
       enddo 
     enddo
   enddo
 
-  shfit_gas= grid_size/2
-  shfit_CDM=0
+  shfit_gas=  -0.5*grid_size*(Omega-OmegaBaryon)/Omega
+  shfit_CDM= 0.5*grid_size*OmegaBaryon/Omega
 
   print *, "shfit_gas =", shfit_gas
   print *, "shfit_CDM =", shfit_CDM

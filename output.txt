@@ -1,0 +1,161 @@
+ ../ic_posbx
+nx =   512
+ny =   512
+nz =   512
+dx =   2.941
+lx =   1.471
+ly =   1.471
+lz =   1.471
+astart = 0.02083
+omegam = 0.30000
+omegav = 0.70000
+h0 =68.00000
+ Boxsize =   1024.00000000000     
+ grid_size =   2.000000    
+ shfit_gas =   1.000000    
+ shfit_CDM =  0.0000000E+00
+ ics.0.hdf5                                                                     
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+           1 file all done
+ ics.1.hdf5                                                                     
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+           2 file all done
+ ics.2.hdf5                                                                     
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+           3 file all done
+ ics.3.hdf5                                                                     
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+           4 file all done
+ ics.4.hdf5                                                                     
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+           5 file all done
+ ics.5.hdf5                                                                     
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+           6 file all done
+ ics.6.hdf5                                                                     
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+           7 file all done
+ ics.7.hdf5                                                                     
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+           8 file all done
+ ics.8.hdf5                                                                     
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+           9 file all done
+ ics.9.hdf5                                                                     
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+          10 file all done
+ ics.10.hdf5                                                                    
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+          11 file all done
+ ics.11.hdf5                                                                    
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+          12 file all done
+ ics.12.hdf5                                                                    
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+          13 file all done
+ ics.13.hdf5                                                                    
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+          14 file all done
+ ics.14.hdf5                                                                    
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+          15 file all done
+ ics.15.hdf5                                                                    
+                      
+ Header writing done
+ ic_pos_bayron_Transform done
+ ic_pos_CDM_Transform done
+ ic_vel_bayron_Transform done
+ ic_vel_CDM_Transform done
+ ID writing done
+          16 file all done
+ all done
