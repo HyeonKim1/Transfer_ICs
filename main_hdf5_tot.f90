@@ -25,7 +25,7 @@ program main
 
 
   integer :: NumPart, TotNumPart 
-  real(8) :: Box, Omega, OmegaBaryon, dx
+  real(8) :: Box, Omega, OmegaBaryon, dx, dummy1, dummy2
   character(len=20) :: FileBase, hdf5_name
 
   integer :: ierr, ii, jj, kk, extra, nn, i, j,k
@@ -96,14 +96,17 @@ program main
   Box=grid_size*nx
   print *, "Boxsize =", Box
   print *, "grid_size =", grid_size
-  FileBase='ics_tot'
   hdf5_name='hdf5'
 
 
-  if (MOD(TotNumPart, file_number) /= 0) then 
-    print *, "The number is not divisible. The total number of particles is ", TotNumPart, "."
-    stop
+  print *, "Please enter the file name (enter 0 for default 'ics_tot'):"
+  read(*,*) FileBase
+
+  if (trim(FileBase) == '0') then
+    FileBase = 'ics_tot'
   end if
+
+  print *, "Using file name:", trim(FileBase)
 
   NumPart = TotNumPart / file_number
 
@@ -150,8 +153,20 @@ program main
     enddo
   enddo
 
-  shfit_gas= -0.5*grid_size*(Omega-OmegaBaryon)/Omega
-  shfit_CDM= 0.5*grid_size*OmegaBaryon/Omega
+  print *, "Enter a shfit_CDM and shfit_gas value  (-1~1 are allowed; any other value will use default):"
+  read(*,*) dummy1, dummy2
+
+  if (dummy1 >= -1.0 .and. dummy1 <= 1.0) then
+    shfit_CDM= 0.5*grid_size*dummy1
+  else
+    shfit_CDM = 0.5*grid_size*OmegaBaryon/Omega
+  end if
+
+  if (dummy2 >= -1.0 .and. dummy2 <= 1.0) then
+    shfit_gas= 0.5*grid_size*dummy2
+  else
+    shfit_gas =-0.5*grid_size*(Omega-OmegaBaryon)/Omega
+  end if
 
   print *, "shfit_gas =", shfit_gas
   print *, "shfit_CDM =", shfit_CDM
@@ -285,7 +300,8 @@ program main
   end if
 
 
-  POS=POS+(grid_size/2)
+  POS=POS-shfit_gas+shfit_CDM
+  POS=MODULO(POS,Box)
 
   call h5screate_simple_f(2, dims2, space_id, error)
   call h5dwrite_f(Coordinates1, H5T_NATIVE_REAL, POS, dims2, error)
